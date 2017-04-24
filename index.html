@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ERROR</title>
+    <link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8">
+</head>
+<body>
+    <div id="termContainer">
+        <div id="topBar">
+            <span></span>
+        </div>
+        <div id="terminal"></div>
+        
+    </div>
+    <script type="text/javascript" src="js/terminal.js"></script>
+    <script type="text/javascript" src="js/drag.js"></script>
+    <script type="text/javascript" src="js/dragnsize.js"></script>
+    <script type="text/javascript">
+        // new Draggable('termContainer');
+        new Drag('termContainer');
+        new Size('termContainer');
+    </script>
+</body>
+</html>
