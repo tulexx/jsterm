@@ -16,7 +16,7 @@ var commands = {
     man: null,
     mkdir: mkdir,
     ps: null,
-    pwd: null,
+    pwd: pwd,
     rm: null,
     touch: touch,
     whoami: whoami,
@@ -247,6 +247,10 @@ function touch(parameter) {
     if (!folder[file]) {
         folder[file] = null;
     }
+}
+
+function pwd() {
+    display(currentFolder);
 }
 
 function whoami() {
