@@ -12,7 +12,7 @@ var commands = {
     help: help,
     ls: ls,
     man: null,
-    mkdir: null,
+    mkdir: mkdir,
     ps: null,
     pwd: null,
     rm: null,
@@ -175,9 +175,22 @@ function ls(folder) {
     terminal.appendChild(output);
 }
 
-function mkdir (folder) {
+function mkdir(folder) {
+    var objFolder = workingFolder(currentFolder)[0];
     var folderArray = folder.split('/');
 
+    if (folderArray.length > 1) {
+        folder = folderArray.pop();
+        objFolder = workingFolder(folderArray.join('/'))[0];
+    }
+
+    if (objFolder[folder]) {
+        var output = document.createElement('p');
+        output.innerHTML = "cannot create directory '" + folderArray.join('/') + folder + "': File exists";
+        terminal.appendChild(output);
+    } else {
+        objFolder[folder] = null;
+    }
 
 
 }
