@@ -1,7 +1,7 @@
 // document.querySelector('body').onlo
 var terminal = document.getElementById('terminal');
 var user = 'guest';
-var hostname = 'tulexx.pl'; //document.location.hostname;
+var hostname = document.location.hostname;
 var prompt = user + '@' + hostname;
 var termInput, ps1;
 var currentFolder = '/home/guest'
