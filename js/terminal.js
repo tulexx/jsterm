@@ -5,7 +5,7 @@ var termInput, ps1;
 var currentFolder = '/home/guest'
 
 var commands = {
-    cat: null,
+    cat: cat,
     cd: null,
     clear: clear,
     echo: echo,
@@ -102,6 +102,25 @@ function ready() {
     termInput.focus();
 }
 
+function cat(parameter) {
+    var output = document.createElement('p');
+
+    if (parameter) {
+        var file = workingFolder(parameter)[0];
+        if (file) {
+            if (!isObject(file)) {
+                output.innerHTML = file;
+            } else {
+                output.innerHTML = parameter + ": Is a directory";
+            }
+        } else {
+            output.innerHTML = parameter + ": No such file or directory";
+        }
+
+        terminal.appendChild(output);
+    }
+}
+
 function clear() {
     terminal.innerHTML = null;
 }
@@ -191,8 +210,6 @@ function mkdir(folder) {
     } else {
         objFolder[folder] = null;
     }
-
-
 }
 
 function touch(parameter) {
