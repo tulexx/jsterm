@@ -35,6 +35,14 @@ var filesystem = {
 
 document.querySelector('#topBar span').innerHTML = prompt;
 
+display(`/**
+           <br>
+           &nbsp;* Welcome to the terminal emulator!
+           <br>
+           &nbsp;* Type help for a list of commands
+           <br>
+           &nbsp;**/`);
+
 ready();
 
 terminal.addEventListener('keydown', enter);
