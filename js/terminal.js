@@ -175,30 +175,6 @@ function ls(folder) {
     terminal.appendChild(output);
 }
 
-function listFiles(folder) {
-    var directories = [];
-    var files = [];
-    //folderArray[0] will be nothing
-    var folderArray = folder.split('/');
-    var list = filesystem['/'];
-
-    if (folderArray.length !== 1) {
-        for (var i=1; i<folderArray.length;i++) {
-            list = list[folderArray[i]];
-        }
-    }
-
-    for (var li in list) {
-        if (isObject(li)) {
-            directories.push(li);
-        } else {
-            files.push(li);
-        }
-    }
-
-    return directories.concat(files);
-}
-
 function mkdir (folder) {
     var folderArray = folder.split('/');
 
