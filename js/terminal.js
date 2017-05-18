@@ -1,6 +1,8 @@
 // document.querySelector('body').onlo
 var terminal = document.getElementById('terminal');
-var prompt = 'guest@' + 'tulexx.pl'; //document.locaton.hostname;
+var user = 'guest';
+var hostname = 'tulexx.pl'; //document.location.hostname;
+var prompt = user + '@' + hostname;
 var termInput, ps1;
 var currentFolder = '/home/guest'
 
@@ -17,7 +19,7 @@ var commands = {
     pwd: null,
     rm: null,
     touch: touch,
-    whoami: null,
+    whoami: whoami,
 };
 
 var filesystem = {
@@ -245,6 +247,10 @@ function touch(parameter) {
     if (!folder[file]) {
         folder[file] = null;
     }
+}
+
+function whoami() {
+    display(user);
 }
 
 function display(input) {
