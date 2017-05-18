@@ -15,9 +15,8 @@ var commands = {
     ls: ls,
     man: null,
     mkdir: mkdir,
-    ps: null,
     pwd: pwd,
-    rm: null,
+    rm: rm,
     touch: touch,
     whoami: whoami,
 };
@@ -246,6 +245,40 @@ function touch(parameter) {
 
     if (!folder[file]) {
         folder[file] = null;
+    }
+}
+
+function rm(parameters) {
+    var dirBlock = true;
+    var folder = null;
+    var file = null;
+    var toDelete = null;
+    parameters = parameters.split(' ');
+
+    if (parameters.length > 1) {
+        if (parameters[0].trim() == '-r') {
+            dirBlock = false;
+        }
+        folder = parameters[1].trim();
+    } else {
+        folder = parameters[0].trim();
+    }
+
+    folder = folder.split('/');
+    file = folder.pop();
+    folder = folder.join('/');
+    folder = workingFolder(folder);
+
+    toDelete = folder[0][file];
+
+    if (toDelete) {
+        if ((isObject(toDelete) && !dirBlock) || !isObject(toDelete)) {
+            delete folder[0][file];
+        } else {
+            error("rm: cannot remove '" + folder[1] + "/" + file  + "': Is a directory");
+        }
+    } else {
+        error("rm: cannot remove '" + folder[1] + "/" + file + "': No such file or directory");
     }
 }
 
