@@ -70,7 +70,7 @@ var Size = function (id) {
         resizing = false;
     });
 
-    var checkCursor = function (event) {
+    function checkCursor(event) {
         var leftBorder = el.offsetLeft;
         var rightBorder = el.offsetLeft + el.clientWidth;
         var bottomBorder = el.offsetTop + el.clientHeight;
