@@ -1,114 +1,103 @@
-var Drag = function (id) {
-    var el = document.getElementById(id);
-    var topBar = el.querySelector('#topBar');
-    var dragging = false;
-    var pos = {
-        x: 0,
-        y: 0
-    };
+var element = document.getElementById('termContainer');
+var terminal = document.getElementById('terminal');
+var topBar = document.getElementById('topBar');
 
-    topBar.addEventListener('mousedown', function (event) {
-        dragging = true;
-        pos.x = event.pageX - el.offsetLeft;
-        pos.y = event.pageY - el.offsetTop;
-    });
+var margins = 10;
+var minWidth = 600;
+var minHeight = 375;
 
-    document.addEventListener('mousemove', function (event) {
-        if (dragging) {
-            el.style.left = (event.pageX - pos.x) + 'px';
-            el.style.top = (event.pageY - pos.y) + 'px';
-        }
+var isMoving = false;
+var isResizing = false;
+var onRightEdge, onBottomEdge, onLeftEdge;
+var bounds;
 
-    });
-
-    document.addEventListener('mouseup', function () {
-        dragging = false;
-    });
+var position = {
+    left: null,
+    top: null,
+    cursorX: null,
+    cursorY: null,
+    clientX: null,
+    clientY: null,
 };
 
-var Size = function (id) {
-    var el = document.getElementById(id);
-    var terminal = el.querySelector('#terminal');
-    var resizing = false;
-    var pos = {
-        x: 0,
-        y: 0
-    };
-    var minWidth = parseInt(getComputedStyle(el).width.slice(0,-2));
-    var minHeight = parseInt(getComputedStyle(el).height.slice(0,-2));
+topBar.addEventListener('mousedown', onTopBar)
+terminal.addEventListener('mousedown', onTerminal);
+document.addEventListener('mouseup', onUp);
+document.addEventListener('mousemove', onMove);
 
-    document.addEventListener('mousemove', function (e) {
-        var direction = checkCursor(e);
-        if (direction && resizing) {
-            switch (direction) {
-                case 'ew':
-                    var offset = e.pageX - pos.x;
-                    var size = minWidth + offset;
-                    var width = (minWidth < size ? size : minWidth) + 'px';
-                    el.style.width = width;
-                    console.log(width);
+function onTopBar(e) {
+    e.preventDefault();
+    calculate(e, element);
 
-                    
-                    break;
-                
-                default:
-                    
-            }
+    isMoving = true;
+}
 
+function onTerminal(e) {
+    calculate(e, element);
+    isResizing = onRightEdge || onBottomEdge || onLeftEdge;
+}
 
-        }
-    });
+function onMove(e) {
 
-    terminal.addEventListener('mousedown', function (e) {
-        resizing = true;
-        pos.x = e.pageX;
-        pos.y = e.pageY;
-        // el.style.width = minWidth + 'px';
-    });
-
-    document.addEventListener('mouseup', function () {
-        resizing = false;
-    });
-
-    function checkCursor(event) {
-        var leftBorder = el.offsetLeft;
-        var rightBorder = el.offsetLeft + el.clientWidth;
-        var bottomBorder = el.offsetTop + el.clientHeight;
-
-        var direction = '';
-
-        //left corner
-        if ((Math.abs(event.pageX - leftBorder) < 4)
-                && (Math.abs(event.pageY - bottomBorder) < 4)) {
-            direction = 'ne';
-        //right corner
-        } else if ((Math.abs(event.pageX - rightBorder) < 4)
-                && (Math.abs(event.pageY - bottomBorder) < 4)) {
-            direction = 'nw';
-        //bottom border
-        } else if (Math.abs(event.pageY - bottomBorder) < 4) {
-            direction = 'ns';
-        //left border
-        } else if (Math.abs(event.pageX - leftBorder) < 4 ) {
-            direction = 'ew';
-        //right border
-        } else if (Math.abs(event.pageX - rightBorder) < 4){
-            direction = 'ew';
-        //default
-        } else {
-            direction = '';
-        }
-
-        cursor(direction);
-
-        return direction;
+    if (isMoving) {
+        element.style.left = (position.left + e.clientX - position.clientX) + 'px';
+        element.style.top = (position.top + e.clientY - position.clientY) + 'px';
+        return
     }
 
-    var cursor = function (direction) {
-        if (direction) {
-            document.body.style.cursor = direction + '-resize';
-        } else {
-            document.body.style.cursor = 'default';
+    calculate(e, terminal);
+
+    if (isResizing) {
+        e.preventDefault();
+        if (onRightEdge) {
+            element.style.width = Math.max(e.clientX - position.left, 0) + 'px';
         }
-    };
-};
+        if (onBottomEdge) {
+            element.style.height = Math.max(e.clientY - position.top, minHeight) + 'px';
+        }
+        if (onLeftEdge) {
+            element.style.left = e.clientX + 'px';
+            // element.style.width = bounds.width + 
+
+        }
+        return
+    }
+
+    //styling cursor
+    if (onRightEdge && onBottomEdge) {
+        element.style.cursor = 'nwse-resize';
+    } else if (onLeftEdge && onBottomEdge) {
+        element.style.cursor = 'nesw-resize';
+    } else if (onRightEdge || onLeftEdge) {
+        element.style.cursor = 'ew-resize';
+    } else if (onBottomEdge) {
+        element.style.cursor = 'ns-resize';
+    } else {
+        element.style.cursor = 'default';
+    }
+}
+
+function onUp(e) {
+    isMoving = false;
+    isResizing = false;
+}
+
+
+
+function calculate(event, element) {
+    bounds = element.getBoundingClientRect();
+
+    position.left = bounds.left;
+    position.top = bounds.top;
+    position.cursorX = event.clientX - bounds.left;
+    position.cursorY = event.clientY - bounds.top;
+    position.clientX = event.clientX;
+    position.clientY = event.clientY;
+
+    onLeftEdge = position.cursorX < margins;
+    onRightEdge = position.cursorX >= bounds.width - margins;
+    onBottomEdge = position.cursorY >= bounds.height - margins;
+
+}
+
+
