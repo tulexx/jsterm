@@ -9,7 +9,7 @@ var commands = {
     cd: null,
     clear: null,
     echo: null,
-    help: null,
+    help: help,
     ls: null,
     man: null,
     mkdir: null,
@@ -32,23 +32,21 @@ document.querySelector('#topBar span').innerHTML = prompt;
 
 ready();
 
-var input = terminal.querySelector('input')
-input.focus();
-
 terminal.addEventListener('keydown', enter);
+terminal.addEventListener('click', function() {
+    termInput.focus();
+});
 
 function enter(e) {
     if (e.which == 13 || e.keyCode == 13) {
-        var old = oldCommand();
-        if (checkCommands(input.value)) {
-            console.log('jest komenda');
+        var old = executedCommand();
+        if (checkCommands(old)) {
+            if (commands[old]) {
+                commands[old]();
+            }
             ready();
-            input = terminal.querySelector('input')
-            input.focus();
         } else if (old == '') {
             ready();
-            input = terminal.querySelector('input')
-            input.focus();
         } else {
             var p = document.createElement('p');
             p.innerHTML = 'Invalid command \"' + old + '\"' + '<br>' + 'type \"help\" for more information';
@@ -56,8 +54,6 @@ function enter(e) {
             terminal.appendChild(p);
 
             ready();
-            input = terminal.querySelector('input')
-            input.focus();
         }
     }
 }
@@ -71,16 +67,16 @@ function checkCommands(cmd) {
     return false;
 }
 
-function oldCommand() {
+function executedCommand() {
     var executed = document.createElement('span');
-    executed.innerHTML = input.value;
+    executed.innerHTML = termInput.value;
 
-    input.parentNode.removeChild(input);
+    termInput.parentNode.removeChild(termInput);
 
     terminal.appendChild(executed);
     terminal.appendChild(document.createElement('br'));
 
-    return executed.innerHTML;
+    return executed.innerHTML.trim();
 }
 
 function ready() {
@@ -96,9 +92,17 @@ function ready() {
 
     terminal.appendChild(ps1);
     terminal.appendChild(termInput);
+    termInput.focus();
 }
 
-function cat() {
+function help() {
+    var output = document.createElement('p');
+    output.innerHTML = '';
+    output.style.margin = 0;
 
+    for (var command in commands) {
+        output.innerHTML += command + '<br>';
+    }
+
+    terminal.appendChild(output);
 }
-
