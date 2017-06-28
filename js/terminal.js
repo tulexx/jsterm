@@ -1,7 +1,7 @@
 // document.querySelector('body').onlo
 var terminal = document.getElementById('terminal');
 var prompt = 'guest@' + 'tulexx.pl'; //document.locaton.hostname;
-var currentFolder = '/home/guest'
+var currentFolder = '/home/guest';
 var termInput, ps1;
 
 var commands = {
@@ -10,7 +10,7 @@ var commands = {
     clear: null,
     echo: null,
     help: help,
-    ls: null,
+    ls: ls,
     man: null,
     mkdir: null,
     ps: null,
@@ -23,7 +23,12 @@ var commands = {
 var filesystem = {
     '/': {
         home: {
-            guest: null,
+            guest: {
+                'test.txt': 'This is a test document',
+                test: {
+
+                },
+            },
         },
     },
 };
@@ -40,9 +45,10 @@ terminal.addEventListener('click', function() {
 function enter(e) {
     if (e.which == 13 || e.keyCode == 13) {
         var old = executedCommand();
-        if (checkCommands(old)) {
-            if (commands[old]) {
-                commands[old]();
+        var cmd = old.split(' ');
+        if (checkCommands(cmd[0])) {
+            if (commands[cmd[0]]) {
+                commands[cmd[0]](cmd[1]);
             }
             ready();
         } else if (old == '') {
@@ -50,7 +56,6 @@ function enter(e) {
         } else {
             var p = document.createElement('p');
             p.innerHTML = 'Invalid command \"' + old + '\"' + '<br>' + 'type \"help\" for more information';
-            p.style.margin = 0;
             terminal.appendChild(p);
 
             ready();
@@ -98,11 +103,54 @@ function ready() {
 function help() {
     var output = document.createElement('p');
     output.innerHTML = '';
-    output.style.margin = 0;
 
     for (var command in commands) {
-        output.innerHTML += command + '<br>';
+        //showing only the commands that are implemented
+        output.innerHTML += commands[command]?command + '<br>':'';
     }
 
     terminal.appendChild(output);
+}
+
+function ls(folder) {
+    var output = document.createElement('p');
+    var files = listFiles(currentFolder);
+
+    if (folder) {
+        if (folder == '/') {
+            files = filesystem['/'];
+        } else {
+            folderArray = folder.split('/');
+            if (folderArray.length == 1) {
+                if (files[folderArray[0]]) {
+                    files = files[folderArray[0]];
+                } else {
+                    files = null;
+                    output.innerHTML = "ls: cannot access '" + folder + "': No such file or directory";
+                }
+            } else {
+                files = listFiles(folder);
+            }
+        }
+    } 
+
+    for (var file in files) {
+        var span = document.createElement('span');
+        span.innerHTML = file;
+        span.style.marginRight = '20px';
+        output.appendChild(span);
+    }
+
+    terminal.appendChild(output);
+}
+
+function listFiles(folder) {
+    var curr = folder.split('/');
+    var files = filesystem['/'][curr[1]];
+
+    for (var i=2; i<curr.length;i++) {
+        files = files[curr[i]];
+    }
+
+    return files
 }
