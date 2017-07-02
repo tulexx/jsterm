@@ -7,7 +7,7 @@ var termInput, ps1;
 var commands = {
     cat: null,
     cd: null,
-    clear: null,
+    clear: clear,
     echo: null,
     help: help,
     ls: ls,
@@ -95,6 +95,10 @@ function ready() {
     terminal.appendChild(ps1);
     terminal.appendChild(termInput);
     termInput.focus();
+}
+
+function clear() {
+    terminal.innerHTML = null;
 }
 
 function help() {
