@@ -16,7 +16,7 @@ var commands = {
     ps: null,
     pwd: null,
     rm: null,
-    touch: null,
+    touch: touch,
     whoami: null,
 };
 
@@ -25,9 +25,6 @@ var filesystem = {
         home: {
             guest: {
                 'test.txt': 'This is a test document',
-                test: {
-
-                },
             },
         },
     },
@@ -153,4 +150,17 @@ function listFiles(folder) {
     }
 
     return files
+}
+
+function touch (file) {
+    if (file) {
+        var curr = listFiles(currentFolder);
+        if (!curr[file]) {
+            curr[file] = null;
+        }
+    } else {
+        var output = document.createElement('p');
+        output.innerHTML = "touch: missing file operand";
+        terminal.appendChild(output);
+    }
 }
