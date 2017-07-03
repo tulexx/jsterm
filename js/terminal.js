@@ -8,7 +8,7 @@ var commands = {
     cat: null,
     cd: null,
     clear: clear,
-    echo: null,
+    echo: echo,
     help: help,
     ls: ls,
     man: null,
@@ -42,7 +42,8 @@ terminal.addEventListener('click', function() {
 function enter(e) {
     if (e.which == 13 || e.keyCode == 13) {
         var old = executedCommand();
-        var cmd = old.split(' ');
+        var fullCommand = old.split(' ');
+        var cmd = [fullCommand.shift(), fullCommand.join(' ')];
         if (checkCommands(cmd[0])) {
             if (commands[cmd[0]]) {
                 commands[cmd[0]](cmd[1]);
@@ -71,14 +72,15 @@ function checkCommands(cmd) {
 
 function executedCommand() {
     var executed = document.createElement('span');
-    executed.innerHTML = termInput.value;
+    var cmd = termInput.value;
+    executed.innerHTML = cmd;
 
     termInput.parentNode.removeChild(termInput);
 
     terminal.appendChild(executed);
     terminal.appendChild(document.createElement('br'));
 
-    return executed.innerHTML.trim();
+    return cmd.trim();
 }
 
 function ready() {
@@ -87,6 +89,7 @@ function ready() {
     ps1.innerHTML = prompt + ':';
     ps1.innerHTML += currentFolder == '/home/guest' ? '~' : currentFolder;
     ps1.innerHTML += '$ ';
+    ps1.id = 'ps1';
 
     termInput = document.createElement('input');
     termInput.id = 'termInput';
@@ -99,6 +102,37 @@ function ready() {
 
 function clear() {
     terminal.innerHTML = null;
+}
+
+function echo(parameters) {
+    var files = listFiles(currentFolder);
+    var split = parameters.split('>>');
+    var text = '';
+    var file = null;
+
+    if (split.length != 1) {
+        text = split[0].trim();
+        file = split[1].trim().split(' ')[0];
+        if (file in files) {
+            var tmp = files[file];
+            tmp += '<br>' + text;
+            files[file] = tmp;
+        } else {
+            touch(file);
+            files[file] = text;
+        }
+    } else {
+        split = parameters.split('>');
+        if (split.length != 1) {
+            text = split[0].trim();
+            file = split[1].trim().split(' ')[0];
+            files[file] = text;
+        } else {
+            var output = document.createElement('p');
+            output.innerHTML = parameters;
+            terminal.appendChild(output);
+        }
+    }
 }
 
 function help() {
@@ -133,7 +167,7 @@ function ls(folder) {
                 files = listFiles(folder);
             }
         }
-    } 
+    }
 
     for (var file in files) {
         var span = document.createElement('span');
