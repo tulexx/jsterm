@@ -107,28 +107,32 @@ function clear() {
 }
 
 function echo(parameters) {
-    var files = listFiles(currentFolder);
+    var folder = workingFolder(currentFolder)[0];
     var split = parameters.split('>>');
     var text = '';
     var file = null;
 
-    if (split.length != 1) {
+    if (split.length > 1) {
         text = split[0].trim();
         file = split[1].trim().split(' ')[0];
-        if (file in files) {
-            var tmp = files[file];
+        if (file in folder) {
+            var tmp = folder[file];
             tmp += '<br>' + text;
-            files[file] = tmp;
+            folder[file] = tmp;
         } else {
             touch(file);
-            files[file] = text;
+            folder[file] = text;
         }
-    } else {
+    }
+     else {
         split = parameters.split('>');
-        if (split.length != 1) {
+        if (split.length > 1) {
             text = split[0].trim();
             file = split[1].trim().split(' ')[0];
-            files[file] = text;
+            if (!(file in folder)) {
+                touch(file);
+            }
+            folder[file] = text;
         } else {
             var output = document.createElement('p');
             output.innerHTML = parameters;
@@ -202,16 +206,27 @@ function mkdir (folder) {
 
 }
 
-function touch (file) {
-    if (file) {
-        var curr = listFiles(currentFolder);
-        if (!curr[file]) {
-            curr[file] = null;
-        }
-    } else {
+function touch(parameter) {
+    if (!parameter) {
         var output = document.createElement('p');
         output.innerHTML = "touch: missing file operand";
         terminal.appendChild(output);
+        return;
+    }
+
+    var folder = workingFolder(currentFolder)[0];
+    var split = parameter.split('/');
+    var file = '';
+
+    if (split.length > 1) {
+        file = split.pop();
+        folder = workingFolder(split.join('/'))[0];
+    } else {
+        file = parameter;
+    }
+
+    if (!folder[file]) {
+        folder[file] = null;
     }
 }
 
