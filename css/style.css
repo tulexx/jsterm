@@ -3,8 +3,14 @@
   src: url('../fonts/UbuntuMono-Regular.ttf');
 }
 
+body {
+  background-color: #323232;
+}
+
 #termContainer {
   position: absolute;
+  top: 30%;
+  left: 35%;
   width: 80ch;
   height: 25em;
   font-family: 'Ubuntu Mono', monospace;

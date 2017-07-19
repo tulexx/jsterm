@@ -1,8 +1,8 @@
 // document.querySelector('body').onlo
 var terminal = document.getElementById('terminal');
 var prompt = 'guest@' + 'tulexx.pl'; //document.locaton.hostname;
-var currentFolder = '/home/guest';
 var termInput, ps1;
+var currentFolder = '/home/guest'
 
 var commands = {
     cat: null,
@@ -25,10 +25,12 @@ var filesystem = {
         home: {
             guest: {
                 'test.txt': 'This is a test document',
+                folder: {},
             },
         },
     },
 };
+
 
 document.querySelector('#topBar span').innerHTML = prompt;
 
@@ -149,45 +151,55 @@ function help() {
 
 function ls(folder) {
     var output = document.createElement('p');
-    var files = listFiles(currentFolder);
+    var dir = workingFolder(folder);
 
-    if (folder) {
-        if (folder == '/') {
-            files = filesystem['/'];
-        } else {
-            folderArray = folder.split('/');
-            if (folderArray.length == 1) {
-                if (files[folderArray[0]]) {
-                    files = files[folderArray[0]];
-                } else {
-                    files = null;
-                    output.innerHTML = "ls: cannot access '" + folder + "': No such file or directory";
-                }
-            } else {
-                files = listFiles(folder);
+    if (dir[0]) {
+        if (isObject(dir[0])) {
+            for (var file in dir[0]) {
+                var span = document.createElement('span');
+                span.innerHTML = file;
+                span.style.marginRight = '20px';
+                output.appendChild(span);
             }
+        } else {
+            output.innerHTML = dir[1];
         }
-    }
-
-    for (var file in files) {
-        var span = document.createElement('span');
-        span.innerHTML = file;
-        span.style.marginRight = '20px';
-        output.appendChild(span);
+    } else {
+        output.innerHTML = "ls: cannot access '" + folder + "': No such file or directory";
     }
 
     terminal.appendChild(output);
 }
 
 function listFiles(folder) {
-    var curr = folder.split('/');
-    var files = filesystem['/'][curr[1]];
+    var directories = [];
+    var files = [];
+    //folderArray[0] will be nothing
+    var folderArray = folder.split('/');
+    var list = filesystem['/'];
 
-    for (var i=2; i<curr.length;i++) {
-        files = files[curr[i]];
+    if (folderArray.length !== 1) {
+        for (var i=1; i<folderArray.length;i++) {
+            list = list[folderArray[i]];
+        }
     }
 
-    return files
+    for (var li in list) {
+        if (isObject(li)) {
+            directories.push(li);
+        } else {
+            files.push(li);
+        }
+    }
+
+    return directories.concat(files);
+}
+
+function mkdir (folder) {
+    var folderArray = folder.split('/');
+
+
+
 }
 
 function touch (file) {
@@ -201,4 +213,66 @@ function touch (file) {
         output.innerHTML = "touch: missing file operand";
         terminal.appendChild(output);
     }
+}
+
+function isObject(val) {
+    if (val === null) { 
+        return false; 
+    }
+
+    return ((typeof val === 'function') || (typeof val === 'object'));
+}
+
+function workingFolder(folder) {
+    var objFolder = filesystem['/']['home']['guest'];
+    var strFolder = '/home/guest/';
+    var folderArray = [];
+    var counter = 3;
+
+    if (folder) {
+        folderArray = folder.split('/');
+    } else {
+        folderArray = currentFolder.split('/');
+    }
+
+    if (folderArray[folderArray.length - 1] == '') {
+        folderArray.pop();
+        folder = folder.slice(0, -1);
+    }
+
+    if (folderArray.length > 1) {
+        if (folderArray[0] == '') {
+            objFolder = filesystem['/'];
+            strFolder = '/';
+            counter = 1;
+        } else if (folderArray[0] == '~') {
+            folderArray.shift();
+            folderArray = currentFolder.split('/').concat(folderArray);
+        }
+    } else {
+        if (folderArray[0] != '~') {
+            if (folderArray[0] != '') {
+                folderArray = currentFolder.split('/');
+                folderArray.push(folder);
+            }
+
+            objFolder = filesystem['/'];
+            strFolder = '/';
+            counter = 1;
+        }
+    }
+
+
+    for (counter; counter < folderArray.length; counter++) {
+        var node = folderArray[counter];
+        objFolder = objFolder[folderArray[counter]];
+        strFolder += node + '/';
+        if (!isObject(objFolder)) {
+            break;
+        }
+    }
+
+    strFolder = strFolder.length > 1 ? strFolder.slice(0, -1) : '/';
+
+    return [objFolder, strFolder];
 }
