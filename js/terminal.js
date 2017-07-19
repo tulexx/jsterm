@@ -6,7 +6,7 @@ var currentFolder = '/home/guest'
 
 var commands = {
     cat: cat,
-    cd: null,
+    cd: cd,
     clear: clear,
     echo: echo,
     help: help,
@@ -89,7 +89,7 @@ function ready() {
     ps1 = document.createElement('span');
 
     ps1.innerHTML = prompt + ':';
-    ps1.innerHTML += currentFolder == '/home/guest' ? '~' : currentFolder;
+    ps1.innerHTML += currentFolder.includes('/home/guest') ? currentFolder.replace('/home/guest','~') : currentFolder;
     ps1.innerHTML += '$ ';
     ps1.id = 'ps1';
 
@@ -103,21 +103,39 @@ function ready() {
 }
 
 function cat(parameter) {
-    var output = document.createElement('p');
-
     if (parameter) {
         var file = workingFolder(parameter)[0];
         if (file) {
             if (!isObject(file)) {
-                output.innerHTML = file;
+                display(file);
             } else {
-                output.innerHTML = parameter + ": Is a directory";
+                error("cat: " + parameter + ": Is a directory");
             }
         } else {
-            output.innerHTML = parameter + ": No such file or directory";
+            error("cat: " + parameter + ": No such file or directory");
         }
+    }
+}
 
-        terminal.appendChild(output);
+function cd(folder) {
+    if (!folder) {
+        folder = '~';
+    } else if (folder == '..') {
+        folder = currentFolder.split('/');
+        folder.pop();
+        folder = folder.join('/');
+    }
+
+    var dir = workingFolder(folder);
+
+    if (dir[0]) {
+        if (isObject(dir[0])) {
+            currentFolder = dir[1];
+        } else {
+            error("cd: " + folder + ": Not a directory");
+        }
+    } else {
+        error("cd: " + folder + ": No such file or directory");
     }
 }
 
@@ -153,23 +171,20 @@ function echo(parameters) {
             }
             folder[file] = text;
         } else {
-            var output = document.createElement('p');
-            output.innerHTML = parameters;
-            terminal.appendChild(output);
+            display(parameters);
         }
     }
 }
 
 function help() {
-    var output = document.createElement('p');
-    output.innerHTML = '';
+    var text = '';
 
     for (var command in commands) {
         //showing only the commands that are implemented
-        output.innerHTML += commands[command]?command + '<br>':'';
+        text += commands[command]?command + '<br>':'';
     }
 
-    terminal.appendChild(output);
+    display(text);
 }
 
 function ls(folder) {
@@ -204,9 +219,7 @@ function mkdir(folder) {
     }
 
     if (objFolder[folder]) {
-        var output = document.createElement('p');
-        output.innerHTML = "cannot create directory '" + folderArray.join('/') + folder + "': File exists";
-        terminal.appendChild(output);
+        error("mkdir: cannot create directory '" + folderArray.join('/') + folder + "': File exists");
     } else {
         objFolder[folder] = null;
     }
@@ -214,9 +227,7 @@ function mkdir(folder) {
 
 function touch(parameter) {
     if (!parameter) {
-        var output = document.createElement('p');
-        output.innerHTML = "touch: missing file operand";
-        terminal.appendChild(output);
+        error("touch: missing file operand");
         return;
     }
 
@@ -235,6 +246,14 @@ function touch(parameter) {
         folder[file] = null;
     }
 }
+
+function display(input) {
+    var output = document.createElement('p');
+    output.innerHTML = input;
+    terminal.appendChild(output);
+}
+
+var error = display;
 
 function isObject(val) {
     if (val === null) { 
